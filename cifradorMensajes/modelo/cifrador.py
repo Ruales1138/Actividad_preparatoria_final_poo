@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, ErrorContenido, SinLetras
+from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, ErrorContenido, SinLetras, NoTrim
 
 
 class ReglaCifrado(ABC):
@@ -78,9 +78,17 @@ class ReglaCifradoTraslacion(ReglaCifrado):
 
 class ReglaCifradoNumerico(ReglaCifrado):
     def mensaje_valido(self, mensaje: str) -> bool:
-        return False
+        if self.encontrar_numeros_mensaje(mensaje):
+            raise ContieneNumero('ContieneNumero')
+        if self.encontrar_no_ascii_mensaje(mensaje):
+            raise ContieneNoAscii('ContieneNoAscii')
+        if any(caracter.isalpha for caracter in mensaje):
+            raise NoTrim('NoTrim')
+        return True
 
     def encriptar(self, mensaje: str) -> str:
+        if not self.mensaje_valido(mensaje):
+            raise ValueError
         return 'enc2'
 
     def desencriptar(self, mensaje: str) -> str:
@@ -96,4 +104,3 @@ class Cifrador:
 
     def desencriptar(self, mensaje: str) -> str:
         return self.agente.desencriptar(mensaje)
-
