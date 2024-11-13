@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, ErrorContenido, SinLetras, NoTrim
+from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, ErrorContenido, SinLetras, NoTrim, \
+    DobleEspacio
 
 
 class ReglaCifrado(ABC):
@@ -78,21 +79,49 @@ class ReglaCifradoTraslacion(ReglaCifrado):
 
 class ReglaCifradoNumerico(ReglaCifrado):
     def mensaje_valido(self, mensaje: str) -> bool:
+        def encontrar_espacios(mens: str):
+            if mens.startswith(' ') or mens.endswith(' '):
+                return False
+            return True
+
+        def encontrar_doble_espacio(mens: str):
+            palabras = mens.split(' ')
+            for palabra in palabras:
+                if palabra == '':
+                    return False
+            return True
+
         if self.encontrar_numeros_mensaje(mensaje):
             raise ContieneNumero('ContieneNumero')
         if self.encontrar_no_ascii_mensaje(mensaje):
             raise ContieneNoAscii('ContieneNoAscii')
-        if any(caracter.isalpha for caracter in mensaje):
+        if not encontrar_espacios(mens=mensaje):
             raise NoTrim('NoTrim')
+        if not encontrar_doble_espacio(mens=mensaje):
+            raise DobleEspacio('DobleEspacio')
         return True
 
     def encriptar(self, mensaje: str) -> str:
         if not self.mensaje_valido(mensaje):
             raise ValueError
-        return 'enc2'
+
+        mensaje_min = mensaje.lower()
+        resultado = ''
+        for caracter in mensaje:
+            num = ord(caracter) * self.token
+            resultado += f'{num} '
+
+        return resultado.strip()
 
     def desencriptar(self, mensaje: str) -> str:
-        return 'des2'
+        numeros = mensaje.split(' ')
+        resultado = ''
+        for numero in numeros:
+            numero_original = int(numero) / self.token
+            resultado +=  chr(int(numero_original))
+        return resultado
+
+
 
 
 class Cifrador:
