@@ -18,7 +18,11 @@ class ReglaCifrado(ABC):
         ...
 
     def encontrar_numeros_mensaje(self, mensaje: str):
-        pass
+        numeros = []
+        for i in mensaje:
+            numeros.append(i)
+        return numeros
+
 
     def encontrar_no_ascii_mensaje(self, mensaje: str):
         pass
@@ -30,3 +34,4 @@ class ReglaCifradoTraslacion(ReglaCifrado):
 class ReglaCifradoNumerico(ReglaCifrado):
     def mensaje_valido(self, mensaje: str) -> bool:
         pass
+
