@@ -1,16 +1,22 @@
-# cifradorMensajes/modelo/errores.py
-
-class ContieneNoAscii(Exception):
+class ErrorContenido(Exception):
     pass
 
-class ContieneNumero(Exception):
+class ContieneNumero(ErrorContenido):
     pass
 
-class SinLetras(Exception):
+class ContieneNoAscii(ErrorContenido):
     pass
 
-class NoTrim(Exception):
+# --------------------
+
+class ErrorFormato(Exception):
     pass
 
-class DobleEspacio(Exception):
+class DobleEspacio(ErrorFormato):
+    pass
+
+class SinLetras(ErrorFormato):
+    pass
+
+class NoTrim(ErrorFormato):
     pass
