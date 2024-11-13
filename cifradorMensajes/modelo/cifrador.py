@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from idlelib.iomenu import errors
 
 from cifradorMensajes.modelo.errores import ContieneNumero, ContieneNoAscii, ErrorContenido, SinLetras, NoTrim, \
     DobleEspacio
@@ -37,12 +38,20 @@ class ReglaCifrado(ABC):
 
 class ReglaCifradoTraslacion(ReglaCifrado):
     def mensaje_valido(self, mensaje: str) -> bool:
+        errors = []
+
         if self.encontrar_numeros_mensaje(mensaje):
-            raise ContieneNumero('ContieneNumero')
+            errors.append(ContieneNumero('ContieneNumero'))
+
         if self.encontrar_no_ascii_mensaje(mensaje):
-            raise ContieneNoAscii('ContieneNoAscii')
+            errors.append(ContieneNoAscii('ContieneNoAscii'))
+
         if not any(caracter.isalpha() for caracter in mensaje):
-            raise SinLetras('SinLetras')
+            errors.append(SinLetras('SinLetras'))
+
+        if errors:
+            raise ErrorContenido(errors)
+
         return True
 
     def encriptar(self, mensaje: str) -> str:
@@ -79,6 +88,8 @@ class ReglaCifradoTraslacion(ReglaCifrado):
 
 class ReglaCifradoNumerico(ReglaCifrado):
     def mensaje_valido(self, mensaje: str) -> bool:
+        errors = []
+
         def encontrar_espacios(mens: str):
             if mens.startswith(' ') or mens.endswith(' '):
                 return False
@@ -92,13 +103,20 @@ class ReglaCifradoNumerico(ReglaCifrado):
             return True
 
         if self.encontrar_numeros_mensaje(mensaje):
-            raise ContieneNumero('ContieneNumero')
+            errors.append(ContieneNumero('ContieneNumero'))
+
         if self.encontrar_no_ascii_mensaje(mensaje):
-            raise ContieneNoAscii('ContieneNoAscii')
+            errors.append(ContieneNoAscii('ContieneNoAscii'))
+
         if not encontrar_espacios(mens=mensaje):
-            raise NoTrim('NoTrim')
+            errors.append(NoTrim('NoTrim'))
+
         if not encontrar_doble_espacio(mens=mensaje):
-            raise DobleEspacio('DobleEspacio')
+            errors.append(DobleEspacio('DobleEspacio'))
+
+        if errors:
+            raise ErrorContenido(errors)
+
         return True
 
     def encriptar(self, mensaje: str) -> str:
@@ -107,7 +125,7 @@ class ReglaCifradoNumerico(ReglaCifrado):
 
         mensaje_min = mensaje.lower()
         resultado = ''
-        for caracter in mensaje:
+        for caracter in mensaje_min:
             num = ord(caracter) * self.token
             resultado += f'{num} '
 
